@@ -1,0 +1,95 @@
+---
+:source:
+  :file: test/test_sht30.c
+  :dirname: test
+  :basename: test_sht30.c
+:successes:
+- :test: test_crc8_datasheet_known_vector_beef
+  :line: 16
+  :message: ''
+  :unity_test_time: 0
+- :test: test_crc8_zero_bytes_vector
+  :line: 23
+  :message: ''
+  :unity_test_time: 0
+- :test: test_crc8_empty_input_returns_init_value
+  :line: 30
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_sends_command_msb_first
+  :line: 37
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_maps_nack_to_driver_error
+  :line: 46
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_maps_timeout_to_driver_error
+  :line: 53
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_maps_hal_param_to_driver_param
+  :line: 59
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_maps_out_of_range_hal_status_to_param_error
+  :line: 66
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_converts_known_frame_25c_40rh
+  :line: 76
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_converts_min_raw_values
+  :line: 90
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_converts_max_raw_values
+  :line: 104
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_rejects_corrupted_temperature_crc
+  :line: 120
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_rejects_corrupted_humidity_crc
+  :line: 131
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_propagates_nack
+  :line: 145
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_propagates_timeout
+  :line: 153
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_propagates_bus_error
+  :line: 160
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_null_temperature_never_touches_i2c
+  :line: 169
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_null_humidity_never_touches_i2c
+  :line: 178
+  :message: ''
+  :unity_test_time: 0
+- :test: test_read_with_stub_callback_fake_sensor
+  :line: 199
+  :message: ''
+  :unity_test_time: 0
+- :test: test_trigger_ok_but_read_nacks_midway_sequence
+  :line: 212
+  :message: ''
+  :unity_test_time: 0
+:failures: []
+:ignores: []
+:counts:
+  :total: 20
+  :passed: 20
+  :failed: 0
+  :ignored: 0
+:stdout: []
+:time: 0.001653309998800978

@@ -1,0 +1,70 @@
+---
+# =================================================================
+# Ceedling 工程配置（Ceedling 1.0.x 适配版）
+# 修正点：1.0 插件改名 report_tests_pretty_stdout
+#         1.0 头文件路径必须显式 :paths: :include:
+# =================================================================
+:project:
+  :build_root: build
+  :test_file_prefix: test_
+  :which_ceedling: gem
+  :default_tasks:
+    - test:all
+
+:paths:
+  :test:
+    - +:test/**
+  :source:
+    - +:src/**
+  :support:
+    - +:test/support/**
+  :include:              # Ceedling 1.0：头文件搜索路径必须显式声明
+    - +:src/**
+
+:extension:
+  :executable: .out
+
+:defines:
+  :common: &common_defines
+    - UNITY_SUPPORT_64
+  :test:
+    - *common_defines
+  :gcov:
+    - *common_defines
+
+# CMock 配置：plugins 决定可用的 Mock API（sht30 模块会逐一演示）
+:cmock:
+  :mock_prefix: mock_
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: TRUE
+  :plugins:
+    - :ignore
+    - :ignore_arg
+    - :expect_any_args
+    - :array
+    - :callback
+    - :return_thru_ptr
+  :treat_as:
+    uint8_t:  HEX8
+    uint16_t: HEX16
+    uint32_t: UINT32
+    int8_t:   INT8
+    int16_t:  INT16
+    int32_t:  INT32
+    hal_i2c_status_t: INT
+
+# gcov 插件：ceedling gcov:all 时插桩编译并调 gcovr 出报告
+:gcov:
+  :reports:
+    - HtmlDetailed
+    - Cobertura
+  :gcovr:
+    :html_artifact_filename: gcov_report.html
+
+# 注意：Ceedling 1.0 起报告插件名为 report_tests_pretty_stdout
+:plugins:
+  :load_paths: []
+  :enabled:
+    - report_tests_pretty_stdout
+    - module_generator
+    - gcov
