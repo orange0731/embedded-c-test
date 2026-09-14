@@ -1,0 +1,6 @@
+# Ceedling 构建产物（clobber 会整个删重建，不入库）
+build/
+# 分支定性时临时生成的 gcov 文本报告
+*.gcov
+# 变异脚本备份残留（正常不会存在，兜底）
+*.mutbak
