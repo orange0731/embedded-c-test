@@ -1,0 +1,91 @@
+---
+:source:
+  :file: test/test_pid.c
+  :dirname: test
+  :basename: test_pid.c
+:successes:
+- :test: test_init_with_valid_params_succeeds
+  :line: 16
+  :message: ''
+  :unity_test_time: 0
+- :test: test_init_rejects_null_handle
+  :line: 22
+  :message: ''
+  :unity_test_time: 0
+- :test: test_init_rejects_inverted_limits
+  :line: 27
+  :message: ''
+  :unity_test_time: 0
+- :test: test_proportional_term_only
+  :line: 37
+  :message: ''
+  :unity_test_time: 0
+- :test: test_integral_term_accumulates_over_cycles
+  :line: 46
+  :message: ''
+  :unity_test_time: 0
+- :test: test_derivative_term_only_first_cycle
+  :line: 59
+  :message: ''
+  :unity_test_time: 0
+- :test: test_derivative_is_zero_when_error_constant
+  :line: 68
+  :message: ''
+  :unity_test_time: 0
+- :test: test_output_saturates_at_max
+  :line: 80
+  :message: ''
+  :unity_test_time: 0
+- :test: test_output_saturates_at_min
+  :line: 88
+  :message: ''
+  :unity_test_time: 0
+- :test: test_integral_anti_windup_clamps_at_max
+  :line: 98
+  :message: ''
+  :unity_test_time: 0
+- :test: test_integral_anti_windup_clamps_at_min
+  :line: 114
+  :message: ''
+  :unity_test_time: 0
+- :test: test_reset_clears_integral_and_previous_error
+  :line: 129
+  :message: ''
+  :unity_test_time: 0
+- :test: test_dt_zero_returns_false_and_output_untouched
+  :line: 145
+  :message: ''
+  :unity_test_time: 0
+- :test: test_dt_negative_returns_false
+  :line: 152
+  :message: ''
+  :unity_test_time: 0
+- :test: test_compute_rejects_null_pid
+  :line: 159
+  :message: ''
+  :unity_test_time: 0
+- :test: test_compute_rejects_null_output
+  :line: 165
+  :message: ''
+  :unity_test_time: 0
+- :test: test_zero_error_produces_zero_output_on_fresh_controller
+  :line: 172
+  :message: ''
+  :unity_test_time: 0
+- :test: test_multi_cycle_convergence_with_plant_model
+  :line: 182
+  :message: ''
+  :unity_test_time: 0
+- :test: test_reset_null_handle_is_harmless
+  :line: 197
+  :message: ''
+  :unity_test_time: 0
+:failures: []
+:ignores: []
+:counts:
+  :total: 19
+  :passed: 19
+  :failed: 0
+  :ignored: 0
+:stdout: []
+:time: 0.005467217008117586

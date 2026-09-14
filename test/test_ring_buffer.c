@@ -275,20 +275,4 @@ void test_query_functions_return_safe_defaults_on_null_handle(void)
     TEST_ASSERT_TRUE(ring_buffer_is_full(NULL));
 }
 
-void test_query_functions_return_safe_defaults_on_null_handle(void)
-{
-    /* 查询类接口的 NULL 防御：返回安全默认值而不是崩溃 */
-    TEST_ASSERT_EQUAL_UINT(0u, (unsigned)ring_buffer_count(NULL));
-    TEST_ASSERT_EQUAL_UINT(0u, (unsigned)ring_buffer_free(NULL));
-    TEST_ASSERT_TRUE(ring_buffer_is_empty(NULL));
-    TEST_ASSERT_TRUE(ring_buffer_is_full(NULL));
-}
 
-void test_query_functions_return_safe_defaults_on_null_handle(void)
-{
-    /* 查询类接口的 NULL 防御：返回安全默认值而不是崩溃 */
-    TEST_ASSERT_EQUAL_UINT(0u, (unsigned)ring_buffer_count(NULL));
-    TEST_ASSERT_EQUAL_UINT(0u, (unsigned)ring_buffer_free(NULL));
-    TEST_ASSERT_TRUE(ring_buffer_is_empty(NULL));
-    TEST_ASSERT_TRUE(ring_buffer_is_full(NULL));
-}

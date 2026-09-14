@@ -231,16 +231,4 @@ void test_crc8_zero_length_with_valid_pointer_returns_init(void)
     TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
 }
 
-void test_crc8_zero_length_with_valid_pointer_returns_init(void)
-{
-    /* len=0 且指针非 NULL：覆盖 "len == 0u" 这个独立条件（短路求值的第二操作数） */
-    const uint8_t dummy = 0u;
-    TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
-}
 
-void test_crc8_zero_length_with_valid_pointer_returns_init(void)
-{
-    /* len=0 且指针非 NULL：覆盖 "len == 0u" 这个独立条件（短路求值的第二操作数） */
-    const uint8_t dummy = 0u;
-    TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
-}

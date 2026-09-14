@@ -1,0 +1,47 @@
+name: Ceedling Unit Test & Coverage Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest      # 纯 Linux 环境，证明项目不依赖 WSL/本机状态
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Setup Python (gcovr)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          gem install ceedling --no-document
+          pip install gcovr
+
+      - name: Run all unit tests (89 cases)
+        run: ceedling test:all
+
+      # 门禁不过则 job 失败，PR 上直接红灯拦截
+      - name: Coverage gate (line>=95, branch>=90)
+        run: bash scripts/check_coverage.sh
+
+      # 即使门禁失败也上传报告，便于定位是哪一行/哪一分支掉了覆盖率
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/gcov/
+          retention-days: 14

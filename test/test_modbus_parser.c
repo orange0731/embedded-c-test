@@ -257,56 +257,8 @@ void test_parse_accepts_read_input_registers_function_0x04(void)
     TEST_ASSERT_EQUAL_HEX8(MODBUS_FUNC_READ_INPUT, parsed.function);
 }
 
-void test_parse_rejects_write_multiple_with_data_len_below_5(void)
-{
-    /* 0x10 数据区最少 5 字节（地址2+数量2+字节计数1），只给 4 个 */
-    uint8_t frame[16];
-    const uint8_t data[4] = {0x00u, 0x00u, 0x00u, 0x02u};
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_WRITE_MULTIPLE, data, 4u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_ERR_DATA, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-}
 
-void test_parse_rejects_write_multiple_quantity_zero(void)
-{
-    uint8_t frame[16];
-    const uint8_t data[5] = {0x00u, 0x00u, 0x00u, 0x00u, 0x00u};  /* 数量=0，协议下限 1 */
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_WRITE_MULTIPLE, data, 5u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_ERR_DATA, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-}
 
-void test_parse_accepts_read_input_registers_function_0x04(void)
-{
-    /* 0x04 与 0x03 共用校验逻辑，但 case 标签行需要自己的帧来覆盖 */
-    uint8_t frame[12];
-    const uint8_t data[4] = {0x00u, 0x00u, 0x00u, 0x01u};
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_READ_INPUT, data, 4u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_OK, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-    TEST_ASSERT_EQUAL_HEX8(MODBUS_FUNC_READ_INPUT, parsed.function);
-}
 
-void test_parse_rejects_write_multiple_with_data_len_below_5(void)
-{
-    /* 0x10 数据区最少 5 字节（地址2+数量2+字节计数1），只给 4 个 */
-    uint8_t frame[16];
-    const uint8_t data[4] = {0x00u, 0x00u, 0x00u, 0x02u};
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_WRITE_MULTIPLE, data, 4u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_ERR_DATA, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-}
 
-void test_parse_rejects_write_multiple_quantity_zero(void)
-{
-    uint8_t frame[16];
-    const uint8_t data[5] = {0x00u, 0x00u, 0x00u, 0x00u, 0x00u};  /* 数量=0，协议下限 1 */
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_WRITE_MULTIPLE, data, 5u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_ERR_DATA, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-}
 
-void test_parse_accepts_read_input_registers_function_0x04(void)
-{
-    /* 0x04 与 0x03 共用校验逻辑，但 case 标签行需要自己的帧来覆盖 */
-    uint8_t frame[12];
-    const uint8_t data[4] = {0x00u, 0x00u, 0x00u, 0x01u};
-    size_t len = build_frame(frame, SLAVE_ADDR, MODBUS_FUNC_READ_INPUT, data, 4u);
-    TEST_ASSERT_EQUAL_INT(MODBUS_OK, modbus_parse_frame(frame, len, SLAVE_ADDR, &parsed));
-    TEST_ASSERT_EQUAL_HEX8(MODBUS_FUNC_READ_INPUT, parsed.function);
-}
