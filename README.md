@@ -1,6 +1,6 @@
 # 嵌入式 C 单元测试与覆盖率实践（Ceedling / Unity / CMock）
 
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue)
+![CI](https://github.com/你的用户名/embedded-c-ceedling-test/actions/workflows/ceedling.yml/badge.svg)
 ![Tests](https://img.shields.io/badge/tests-89%20passed-brightgreen)
 ![Line Coverage](https://img.shields.io/badge/line%20coverage-100%25-brightgreen)
 ![Branch Coverage](https://img.shields.io/badge/branch%20coverage-97.9%25-brightgreen)
