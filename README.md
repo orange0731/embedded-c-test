@@ -85,7 +85,7 @@ modbus_parser populate 的 `data_len==0` 分支在现有校验规则下**不可�
 （无任何合法帧数据区为 0），分析后接受；ring_buffer 2 个防御性分支
 （详见 `build/gcov/coverage.html` 逐行标注）。
 
-> 📷 *截图占位：此处粘贴 `build/gcov/coverage.html` 总览页。*
+![覆盖率总览](docs/images/coverage_overview.png)
 
 ## 为什么要 Mock 硬件？
 

@@ -156,6 +156,7 @@ void test_uninitialized_handle_is_rejected_by_all_ops(void)
     TEST_ASSERT_FALSE(ring_buffer_push(&zombie, 1u));
     TEST_ASSERT_FALSE(ring_buffer_pop(&zombie, &out));
     TEST_ASSERT_FALSE(ring_buffer_peek(&zombie, &out));
+    TEST_ASSERT_FALSE(ring_buffer_peek(NULL, &out));  /* 补 peek 的 NULL 句柄防御弧 */
     /* clear(NULL) 必须是无害的——void 接口用"调用后不崩"作为断言 */
     ring_buffer_clear(NULL);
     ring_buffer_clear(&zombie);
