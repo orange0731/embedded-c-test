@@ -1,4 +1,5 @@
 #include "pid.h"
+#include <math.h>   /* isnan：NaN 无法被 <= 比较捕获，必须显式检查 */
 #include <stddef.h>  /* NULL 定义于此，IWYU */
 
 bool pid_init(pid_t *pid, float kp, float ki, float kd, float out_min, float out_max)
@@ -37,14 +38,19 @@ bool pid_compute(pid_t *pid, float setpoint, float measurement, float dt, float 
     if ((pid == NULL) || (output == NULL)) {
         return false;
     }
-    /* dt 非法时提前返回：既不除零，也保证调用者输出变量不被污染 */
-    if (dt <= 0.0f) {
+    /* dt 非法（含 NaN）时提前返回：既不除零，也保证输出不被污染。
+       注意：NaN 参与任何比较结果都是 false，"dt <= 0" 拦不住它 */
+    if (isnan(dt) || (dt <= 0.0f)) {
         return false;
     }
 
     float error = setpoint - measurement;
+    /* error 为 NaN 直接拒绝：NaN 有传染性，一旦进入积分器将永久污染 */
+    if (isnan(error)) {
+        return false;
+    }
 
-    /* 先积分后限幅：抗饱和的核心，方向错一点都会被执行序列测试抓住 */
+    /* 先积分后限幅：抗饱和的核心 */
     pid->integral += error * dt;
     if (pid->integral > pid->int_max) {
         pid->integral = pid->int_max;
@@ -53,8 +59,8 @@ bool pid_compute(pid_t *pid, float setpoint, float measurement, float dt, float 
         pid->integral = pid->int_min;
     }
 
-    /* 注意：首周期 prev_error=0 会有微分冲击（derivative kick），
-       量产做法是"对测量值微分"——本项目的取舍见 README trade-off 章节 */
+    /* 首周期 prev_error=0 存在微分冲击（derivative kick），
+       量产做法是"对测量值微分"——见 README 改进路线 */
     float derivative = (error - pid->prev_error) / dt;
 
     float out = pid->kp * error

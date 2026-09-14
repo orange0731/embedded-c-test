@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "pid.h"
+#include <math.h>  /* NAN 宏 */
 
 static pid_t pid;
 
@@ -200,5 +201,28 @@ void test_reset_null_handle_is_harmless(void)
     float out = 0.0f;
     TEST_ASSERT_TRUE(pid_compute(&pid, 1.0f, 0.0f, 1.0f, &out));  /* 既有状态未被影响 */
 }
+
+
+
+void test_dt_nan_returns_false_and_output_untouched(void)
+{
+    /* NaN 参与比较恒为 false，"dt <= 0" 拦不住它——必须 isnan 显式拦截 */
+    float out = -123.0f;
+    TEST_ASSERT_FALSE(pid_compute(&pid, 1.0f, 0.0f, NAN, &out));
+    TEST_ASSERT_EQUAL_FLOAT(-123.0f, out);
+}
+
+void test_nan_measurement_returns_false_and_integral_stays_clean(void)
+{
+    /* 测量值 NaN → error 为 NaN：拦截且积分器零污染（NaN 有传染性）。
+       验证：随后一个合法周期输出精确等于"从未发生 NaN"时的 3.0 */
+    float out = -123.0f;
+    TEST_ASSERT_FALSE(pid_compute(&pid, 1.0f, NAN, 1.0f, &out));
+    TEST_ASSERT_EQUAL_FLOAT(-123.0f, out);
+    (void)pid_compute(&pid, 1.0f, 0.0f, 1.0f, &out);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001f, 3.0f, out);   /* 1 + 1 + 1 */
+}
+
+
 
 

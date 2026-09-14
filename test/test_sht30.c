@@ -81,7 +81,7 @@ void test_read_converts_known_frame_25c_40rh(void)
     hal_i2c_read_IgnoreArg_data();
     hal_i2c_read_ReturnArrayThruPtr_data(FRAME_25C_40RH, 6);
 
-    float t = 0.0f, h = 0.0f;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_OK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 25.0f, t);
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 40.0f, h);
@@ -109,7 +109,7 @@ void test_read_converts_max_raw_values(void)
     hal_i2c_read_IgnoreArg_data();
     hal_i2c_read_ReturnArrayThruPtr_data(frame, 6);
 
-    float t = 0.0f, h = 0.0f;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_OK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 130.0f, t);
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 100.0f, h);
@@ -124,8 +124,14 @@ void test_read_rejects_corrupted_temperature_crc(void)
     hal_i2c_read_IgnoreArg_data();
     hal_i2c_read_ReturnArrayThruPtr_data(frame, 6);
 
-    float t, h;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_CRC, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 void test_read_rejects_corrupted_humidity_crc(void)
@@ -136,8 +142,14 @@ void test_read_rejects_corrupted_humidity_crc(void)
     hal_i2c_read_IgnoreArg_data();
     hal_i2c_read_ReturnArrayThruPtr_data(frame, 6);
 
-    float t, h;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_CRC, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 /* ---------------- HAL 错误传播（3） ---------------- */
@@ -146,22 +158,40 @@ void test_read_propagates_nack(void)
 {
     /* 传感器不应答（测量未完成/掉线）→ 错误必须原样映射上传，不得吞掉 */
     hal_i2c_read_ExpectAnyArgsAndReturn(HAL_I2C_ERR_NACK);
-    float t, h;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_NACK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 void test_read_propagates_timeout(void)
 {
     hal_i2c_read_ExpectAnyArgsAndReturn(HAL_I2C_ERR_TIMEOUT);
-    float t, h;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_TIMEOUT, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 void test_read_propagates_bus_error(void)
 {
     hal_i2c_read_ExpectAnyArgsAndReturn(HAL_I2C_ERR_BUS);
-    float t, h;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_BUS, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 /* ---------------- 参数防御：关键是"零总线交互"（2） ---------------- */
@@ -201,7 +231,7 @@ void test_read_with_stub_callback_fake_sensor(void)
     memcpy(g_fake_response, FRAME_25C_40RH, 6u);
     hal_i2c_read_StubWithCallback(fake_sht30_on_bus);    /* 挂上假传感器 */
 
-    float t = 0.0f, h = 0.0f;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_OK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 25.0f, t);
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 40.0f, h);
@@ -220,8 +250,14 @@ void test_trigger_ok_but_read_nacks_midway_sequence(void)
     TEST_ASSERT_EQUAL_INT(SHT30_OK, sht30_trigger_measurement(SHT30_I2C_ADDR));
 
     hal_i2c_read_ExpectAnyArgsAndReturn(HAL_I2C_ERR_NACK);
-    float t = 0.0f, h = 0.0f;
+    float t = -999.0f, h = -999.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_NACK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, t);
+    TEST_ASSERT_EQUAL_FLOAT(-999.0f, h);
 }
 
 void test_crc8_zero_length_with_valid_pointer_returns_init(void)

@@ -4,11 +4,11 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
+  workflow_dispatch:          # 允许在 Actions 页手动触发
 
 jobs:
   unit-test:
-    runs-on: ubuntu-latest      # 纯 Linux 环境，证明项目不依赖 WSL/本机状态
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,21 +23,24 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install toolchain
+      # 版本 pin：project.yml 是 Ceedling 1.0.x 适配版，
+      # 不 pin 的话上游发新版会让 CI 在无关 commit 上挂掉
+      - name: Install toolchain (pinned)
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential
-          gem install ceedling --no-document
-          pip install gcovr
+          gem install ceedling --no-document -v '~> 1.0'
+          pip install "gcovr>=8,<9"
 
-      - name: Run all unit tests (89 cases)
+      - name: Unit tests (91 cases)
         run: ceedling test:all
 
-      # 门禁不过则 job 失败，PR 上直接红灯拦截
       - name: Coverage gate (line>=95, branch>=90)
         run: bash scripts/check_coverage.sh
 
-      # 即使门禁失败也上传报告，便于定位是哪一行/哪一分支掉了覆盖率
+      - name: Mutation testing (6 mutants must be killed)
+        run: bash scripts/run_mutation.sh
+
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
