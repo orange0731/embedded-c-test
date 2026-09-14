@@ -1,16 +1,30 @@
-# 嵌入式 C 单元测试与覆盖率实践（Ceedling / Unity / CMock）
+# 嵌入式 C 单元测试与覆盖率框架（Ceedling · Unity · CMock）
 
-![CI](https://github.com/你的用户名/embedded-c-ceedling-test/actions/workflows/ceedling.yml/badge.svg)
+[![CI](https://github.com/orange0731/embedded-c-ceedling-test/actions/workflows/ceedling.yml/badge.svg)](https://github.com/orange0731/embedded-c-ceedling-test/actions/workflows/ceedling.yml)
 ![Tests](https://img.shields.io/badge/tests-89%20passed-brightgreen)
-![Line Coverage](https://img.shields.io/badge/line%20coverage-100%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/branch%20coverage-97.9%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/line-100%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/branch-98.6%25-brightgreen)
 
-面向车载/工业嵌入式场景的**宿主机（host-based）单元测试体系**样板工程：
-对 4 个典型模块（环形缓冲区、Modbus RTU 协议解析、PID 控制器、SHT30 温湿度驱动）
-构建了 89 条单元测试、覆盖率质量门禁、变异测试与 CI 流水线。
-目标：不依赖任何硬件，在 PC 上把"固件逻辑"测到量产级信心。
+> Host-based unit-testing and quality-gating framework for embedded C modules,
+> featuring CMock-based hardware abstraction, gcov/gcovr coverage gates,
+> and mutation testing for test-effectiveness validation.
 
-## 架构
+面向车载 / 工业嵌入式场景的宿主机（host-based）单元测试体系。对 4 个典型
+C 模块（环形缓冲区、Modbus RTU 协议解析、PID 控制器、SHT30 温湿度驱动）
+构建了 **89 条单元测试、覆盖率质量门禁、变异测试与 CI 流水线**。
+不依赖任何目标硬件，使用宿主机 gcc 完成全部构建与执行。
+
+**关键指标**（数据出处：`build/gcov/coverage.txt`，CI Artifacts 可下载）：
+
+| 指标 | 数值 |
+|---|---|
+| 测试用例 | 89（全部通过） |
+| 语句覆盖率 | 100.0%（193/193） |
+| 分支覆盖率 | 98.6%（140/142，缺口见 §9 缺口分析） |
+| 函数覆盖率 | 100.0%（20/20） |
+| 变异测试得分 | 6/6（100%） |
+
+## 1. 系统架构
 
 ```mermaid
 flowchart TB
@@ -20,7 +34,7 @@ flowchart TB
         T3["test_pid (19)"]
         T4["test_sht30 (21)"]
     end
-    subgraph FW["框架层（Ceedling 自动管理）"]
+    subgraph FW["框架层（Ceedling 管理）"]
         U["Unity — 断言引擎"]
         M["CMock — 由 hal_i2c.h 自动生成 mock_hal_i2c.c"]
     end
@@ -29,151 +43,153 @@ flowchart TB
         MB["modbus_parser.c"]
         PID["pid.c"]
         SHT["sht30.c"]
-        HAL[["hal_i2c.h — 纯接口，无实现"]]
+        HAL[["hal_i2c.h — 纯接口"]]
     end
     T1 --> U --> RB
     T2 --> U --> MB
     T3 --> U --> PID
     T4 --> U --> SHT
     T4 --> M
-    M -. "链接时替换真实 BSP" .-> HAL
+    M -. "链接时替换 BSP 实现" .-> HAL
     SHT --> HAL
 ```
 
-## 快速开始（3 条命令）
+## 2. 快速开始
 
 ```bash
-# ① 一次性安装工具链（Ubuntu/WSL2）
+# 环境：Ubuntu / WSL2，一次性安装工具链
 sudo apt install -y build-essential ruby-full gcovr && sudo gem install ceedling
-# ② 跑全部 89 条单元测试
+
+# 运行全部单元测试
 ceedling test:all
-# ③ 覆盖率报告 + 质量门禁（语句≥95% / 分支≥90%）
-bash scripts/check_coverage.sh    # 报告：build/gcov/coverage.html
+
+# 覆盖率报告 + 质量门禁（语句 ≥95% / 分支 ≥90%）
+bash scripts/check_coverage.sh        # 报告：build/gcov/coverage.html
+
+# 变异测试（6 个变异体应全部被杀死）
+bash scripts/run_mutation.sh
 ```
 
-## 目录结构
+## 3. 项目结构
 
 ```
 ├── project.yml                  # Ceedling 主配置（CMock 插件 / gcov 报告）
-├── src/                         # 被测代码（纯 C，无硬件依赖）
-│   ├── ring_buffer.c/.h         # 环形缓冲区（count 判满空，无 malloc）
-│   ├── modbus_parser.c/.h       # Modbus RTU 帧解析 + CRC16
-│   ├── pid.c/.h                 # PID（输出限幅 + 积分抗饱和）
-│   ├── sht30.c/.h               # SHT30 驱动（CRC8 + 单位换算）
-│   └── hal_i2c.h                # I2C 硬件抽象接口（只有声明）
-├── test/                        # 89 条测试，AAA 结构
-├── scripts/check_coverage.sh    # gcovr 覆盖率门禁
-├── docs/mutation_report.md      # 变异测试杀伤力报告（6/6 杀死）
+├── src/                         # 被测生产代码（纯 C，无硬件依赖）
+│   ├── ring_buffer.c/.h         #   环形缓冲区：count 判满空，调用者提供存储
+│   ├── modbus_parser.c/.h       #   Modbus RTU 帧解析 + CRC16
+│   ├── pid.c/.h                 #   PID 控制器：输出限幅 + 积分抗饱和
+│   ├── sht30.c/.h               #   SHT30 驱动：CRC8 校验 + 单位换算
+│   └── hal_i2c.h                #   I2C 硬件抽象接口（仅声明，无实现）
+├── test/                        # 89 条测试，Arrange-Act-Assert 结构
+├── scripts/
+│   ├── check_coverage.sh        #   覆盖率质量门禁
+│   └── run_mutation.sh          #   半自动变异测试
+├── docs/
+│   ├── mutation_report.md       #   变异测试杀伤力报告
+│   └── images/                  #   报告截图
 └── .github/workflows/ceedling.yml
 ```
 
-## 测试矩阵与实测覆盖率
+## 4. 测试策略与覆盖矩阵
 
-数据来源：`ceedling test:all`（89/89 通过）+ `gcovr --print-summary`
-（聚合：lines **100.0%** 193/193 · branches **97.9%** 139/142 · functions **100.0%** 20/20）
+**设计原则**：
 
-| 模块 | 用例数 | 覆盖重点 | 语句覆盖 | 分支覆盖(gcov taken) |
+- 每个防御分支（NULL/越界/非法参数）都有对应用例——没有"不可测"的代码；
+- 边界值成对验证（合法/非法各一侧），异常值与正常值分离；
+- 浮点断言区分精确值（选二进制可表示的输入）与近似值（`FLOAT_WITHIN`）；
+- 区分**已知答案测试**（CRC 国际标准向量 `0x4B37`、数据手册样例 `0xBEEF→0x92`）
+  与**自洽性测试**（用被测 CRC 造帧验证解析逻辑），防止"自己测自己"。
+
+| 模块 | 用例 | 覆盖重点 | 语句 | 分支 |
 |------|:---:|------|:---:|:---:|
-| ring_buffer | 23 | 初始化边界、环绕 FIFO、满/空、NULL 与僵尸句柄、clear/peek、长序列计数一致性 | 100% | 95.2% |
-| modbus_parser | 26 | CRC16 已知向量（0x4B37/样例帧）、长度边界、地址/广播、CRC 字节序、功能码与异常帧、数据语义双重一致性 | 100% | 98.1% |
-| pid | 19 | P/I/D 分量独立验证、输出上下限、积分抗饱和（双向）、复位、dt≤0、闭环收敛仿真 | 100% | 100% |
-| sht30 | 21 | 命令字节序、CRC8 手册向量（0xBEEF→0x92）、读回 CRC 独立校验、NACK/超时/总线传播、换算精度、Callback 假传感器、半路 NACK、越界枚举兜底 | 100% | 100% |
-| **合计** | **89** | Mock：CMock×4 种武器 | **100%** | **97.9%** |
+| ring_buffer | 23 | 初始化边界、环绕 FIFO、满/空、NULL 与僵尸句柄、clear/peek、长序列计数一致性 | 100% | 97.6% |
+| modbus_parser | 26 | CRC16 已知向量、长度边界、地址匹配/广播、CRC 字节序、功能码与异常帧、数据语义双重一致性 | 100% | 98.1% |
+| pid | 19 | P/I/D 分量独立验证、输出上下限、积分抗饱和（双向）、复位、dt≤0 防御、闭环收敛仿真 | 100% | 100% |
+| sht30 | 21 | 命令字节序、CRC8 手册向量、读回 CRC 独立校验、NACK/超时/总线错误传播、换算精度、Callback 假传感器、半路 NACK 时序 | 100% | 100% |
+| **合计** | **89** | — | **100%** | **98.6%** |
 
-**未覆盖分支分析（coverage gap analysis）**：3 个未覆盖分支全部有记录——
-modbus_parser populate 的 `data_len==0` 分支在现有校验规则下**不可达**
-（无任何合法帧数据区为 0），分析后接受；ring_buffer 2 个防御性分支
-（详见 `build/gcov/coverage.html` 逐行标注）。
+## 5. 硬件抽象与 Mock 设计
 
-![覆盖率总览](docs/images/coverage_overview.png)
-
-## 为什么要 Mock 硬件？
-
-`sht30` 依赖 I²C 总线，但 CI 服务器上没有传感器。解法是**把硬件依赖收敛到一个纯接口头文件**（`hal_i2c.h`），测试时由 CMock 生成假实现：
+驱动层（sht30）通过**依赖倒置**与硬件解耦：`hal_i2c.h` 只声明接口，
+量产构建由 BSP 提供实现，测试构建由 CMock 自动生成替身——链接器成为守门员。
 
 ```c
-/* 生产固件：hal_i2c.c 操作真实寄存器；单元测试：CMock 自动生成替身 */
 hal_i2c_read_ExpectAndReturn(SHT30_I2C_ADDR, NULL, 6u, HAL_I2C_OK);
-hal_i2c_read_IgnoreArg_data();                            /* 出参地址不可预知，忽略 */
-hal_i2c_read_ReturnArrayThruPtr_data(FRAME_25C_40RH, 6);  /* 回填"传感器"数据 */
+hal_i2c_read_IgnoreArg_data();                            /* 出参地址不可预知：忽略 */
+hal_i2c_read_ReturnArrayThruPtr_data(FRAME_25C_40RH, 6);  /* 回填模拟传感器数据 */
 ```
 
-由此获得三种硬件上极难构造的能力：**确定性**（每次返回同样的 25°C 帧）、
-**故障注入**（NACK/超时/CRC 损坏随时上演）、**速度**（89 条用例约 2 秒跑完）。
-Mock 保真度用手册已知向量锚定（见 Q3）。
+| CMock 模式 | 项目中的应用场景 |
+|---|---|
+| `ExpectWithArrayAndReturn` | 验证触发命令字节序（0x24, 0x00），按内容而非指针比较 |
+| `IgnoreArg` + `ReturnArrayThruPtr` | 出参回填：模拟传感器返回 6 字节测量帧 |
+| `ExpectAnyArgsAndReturn` | 错误注入：NACK / 超时 / 总线错误传播 |
+| `StubWithCallback` | 行为型假硬件：回调内断言地址与长度，可扩展有状态仿真 |
+| `enforce_strict_ordering` | 强制验证"先写命令、后读数据"的总线时序 |
 
-## 设计 Trade-off
+**保真策略**：Mock 数据以数据手册已知向量与公式极值点（-45/25/130 °C）锚定；
+Mock 只替代电气层，协议语义（CRC、字节序、长度）在被测代码中真实执行；
+电气时序类行为（如测量等待）明确划归集成测试范围。
 
-1. **Unity + CMock 而非 Google Test**：GTest 需要 C++ 运行时且 Mock 要手写类继承；
-   被测代码是纯 C——引入 C++ 只会增加与量产环境的偏差。
-   CMock 直接从 `.h` 生成 Mock，接口变更时 Mock 自动跟随，维护成本最低。
-2. **`hal_i2c.h` 只留接口（依赖倒置）**：驱动面向接口编程，链接期才决定是
-   BSP 实现还是 Mock——"只有声明"让链接器成为守门员。
-3. **环形缓冲区用 `count` 判满/空**：相比"浪费一格"多花 4 字节 RAM，
-   换来 head==tail 时满/空无歧义——可判定性 = 可测试性。
-4. **解析器 populate-on-success**：错误帧绝不写输出参数，
-   `test_parse_detects_crc_error_and_leaves_output_untouched` 用哨兵值验证。
-5. **CRC 位运算而非查表**：已知向量测试（0x4B37 / 0x92）做安全网，
-   未来换查表法重构零风险。
+## 6. 覆盖率质量门禁
 
-## 面试 Q&A
+```
+ceedling clobber → ceedling gcov:all（插桩编译+执行）→ gcovr 汇总
+→ --fail-under-line 95 / --fail-under-branch 90 判定 → 不达标 exit 1
+```
 
-**Q1：分支覆盖率和 MC/DC 有什么区别？**
-分支覆盖率只要求每个分支真假各走一次；MC/DC（DO-178C A 级强制）要求
-**每个独立条件都能独立影响判定结果**。`if (A && B)` 用 (1,1)/(0,0) 即达分支覆盖，
-但 MC/DC 需要 (1,1)/(0,1)/(1,0) 证明 A、B 各自独立有效。本项目补丁用例
-（如 crc8 的 `len==0` 独立条件、0x10 双重一致性拆开测）就是 MC/DC 思维。
+门禁本身经过**失效路径自验证**：将阈值临时设为 100（当前分支 98.6%）
+确认 gcovr 正确报错并返回非零退出码，随后恢复——保证门禁不是"永远绿灯"。
 
-**Q2：Stub 和 Mock 的区别？本项目哪里用了？**
-Stub 只给返回值（状态验证），Mock 还验证交互（行为验证）。
-`ExpectAnyArgsAndReturn(NACK)` 是 Stub；`ExpectWithArrayAndReturn(0x44, cmd, 2, ...)`
-验证命令字节序是 Mock；`test_read_null_*_never_touches_i2c` 利用 CMock 隐含验证
-——"零调用"本身也是交互断言。
+产物：`build/gcov/coverage.html`（逐行标注）、`coverage.txt`（汇总）、
+`coverage.xml`（Cobertura，供代码平台消费）。
 
-**Q3：Mock 硬件会不会导致漏测？怎么保证 Mock 是真的？**
-三道防线：① 已知答案锚定——CRC8 用手册样例 0xBEEF→0x92，换算用公式极值点
-（-45/130°C）和精确点（25°C）；② Mock 只替代电气层，协议语义全部真实执行；
-③ 承认残余风险——电气时序留给集成测试/HIL，单元测试职责边界讲清楚。
+## 7. 变异测试
 
-**Q4：环形缓冲区最难测的边界是什么？**
-**环绕后 head==tail 的时刻**：物理上无法区分满与空。本项目用 count 字段消除歧义，
-`test_full_after_wrap_around_rejects_push` 专门钉死；变异测试证明取模写错、
-漏掉 count++ 都会被立刻抓住（M2/M3）。
+测试充分性通过**变异测试**验证：向源码植入典型缺陷，要求套件必须变红。
+6 个变异体（差一、取模错误、边界运算符、状态丢失、限幅反向、兜底逻辑）
+**全部被杀死（6/6）**，过程自动化于 `scripts/run_mutation.sh`
+（备份 → 植入 → 全量测试 → 判定 → 恢复，幂等可重复）。
 
-**Q5：为什么不用 Google Test？**
-被测对象是 C，测试链就不该引入 C++ 语义偏差；CMock 从头文件自动生成 Mock，
-接口演进时维护成本远低于手写 GMock。
+其中 M6（`default` 兜底返回值写反）曾暴露套件的断言盲区：合法枚举全部命中
+显式 case，`default` 分支不可达——通过注入越界枚举补强用例后杀死。
+完整分析见 [docs/mutation_report.md](docs/mutation_report.md)。
 
-**Q6：为什么 `hal_i2c.h` 连空实现都不给？**
-有空实现就可能被意外链接进测试，Mock 失去意义；"只有声明"让链接器当守门员，
-是 ISO 26262"硬件抽象层"的落地形态。
+## 8. CI 流水线
 
-**Q7：覆盖率 100% 就说明测试充分了吗？**
-不能——覆盖率度量"执行过"，变异测试度量"断言有效"。本项目反例：
-语句覆盖 99% 时变异体 M6（default 返回值写反）仍存活，因合法枚举全走显式 case；
-注入越界枚举补强用例后才杀死（`docs/mutation_report.md`）。覆盖率是下限守门员，
-变异测试才是充分性裁判。
+GitHub Actions（`.github/workflows/ceedling.yml`），push / PR 触发：
 
-**Q8：`dt=0` 为什么返回 false 而不是当 0 处理？**
-除零产生 inf/NaN 并沿积分器扩散——嵌入式里"安静的错误"比"响亮的失败"可怕。
-原则是非法输入尽早失败 + 不污染输出，测试用哨兵值 `-123.0f` 精确断言。
+```
+安装工具链 → ceedling test:all → check_coverage.sh（门禁）
+→ 上传覆盖率报告（Artifacts，失败时也上传以便定位）
+```
 
-## 简历描述
+## 9. 覆盖率缺口分析
 
-**中文：**
-> 基于 Ceedling（Unity+CMock）构建嵌入式 C 宿主机单元测试体系：覆盖环形缓冲区 /
-> Modbus RTU 解析 / PID 控制 / SHT30 驱动 4 个模块共 **89** 条用例；以 gcov+gcovr
-> 建立语句 ≥95%、分支 ≥90% 的 CI 质量门禁（实测**语句 100%、分支 97.9%**）；
-> 设计 CMock 四种注入手段（ExpectWithArray / IgnoreArg / ReturnThruPtr / Callback），
-> 实现 I²C NACK、超时、CRC 损坏等 10 余类故障场景；变异测试 6/6 杀死典型缺陷
-> （差一/取模错误/边界运算符/状态丢失/限幅反向/兜底逻辑）；GitHub Actions 实现
-> push 即测 + 门禁拦截 + 报告归档。
+分支覆盖 98.6%（140/142），2 个未覆盖分支均有定性记录：
 
-**English:**
-> Built a host-based unit-testing framework for embedded C with Ceedling (Unity + CMock):
-> **89 test cases** across ring buffer, Modbus RTU parser, PID controller and SHT30 sensor
-> driver. Enforced CI quality gates (gcov + gcovr); measured **100% line / 97.9% branch
-> coverage**. Designed four CMock injection patterns (ExpectWithArray, IgnoreArg,
-> ReturnThruPtr, callback stubs) emulating 10+ I²C fault scenarios. Validated suite
-> effectiveness via mutation testing — 6/6 seeded defects killed. Automated
-> test → coverage gate → report pipeline with GitHub Actions.
+1. **modbus_parser**：populate 阶段 `data_len == 0` 分支在现有校验规则下
+   不可达（无任何合法帧数据区为 0），分析后接受；
+2. **ring_buffer**：1 个防御性分支（`build/gcov/coverage.html` 逐行标注可查）。
+   peek 的 NULL 句柄防御弧已在缺口分析后补强进既有用例并闭环。
+
+## 10. 设计决策与取舍
+
+| 决策 | 取舍理由 |
+|---|---|
+| Unity + CMock 而非 Google Test | 被测对象为纯 C，避免引入 C++ 语义偏差；CMock 从头文件自动生成 Mock，接口演进时维护成本最低 |
+| `hal_i2c.h` 仅声明不实现 | 依赖倒置；防止空实现被意外链接进测试，链接器即守门员 |
+| 环形缓冲区以 `count` 判满/空 | 代价 4 字节 RAM，消除 head==tail 时满/空歧义——可判定性即可测试性 |
+| 解析器 populate-on-success | 错误帧不污染输出参数，契约可断言（哨兵值用例验证） |
+| CRC 位运算而非查表 | 可读性优先；已知向量测试构成安全网，未来换查表法重构零风险 |
+| 条件覆盖向 MC/DC 思维靠拢 | 复合条件的独立作用拆分为独立用例（如 0x10 双重一致性）；完整 MC/DC 度量通常需商业工具，列为后续方向 |
+
+## 11. 改进路线（Roadmap）
+
+- [ ] CRC 查表法实现（已有已知向量测试作回归安全网）
+- [ ] PID 微分冲击抑制：改为对测量值微分；积分限幅独立整定
+- [ ] 广播地址策略收紧：仅写类功能码（0x06/0x10）响应广播
+- [ ] 解析帧零拷贝视图（指针+长度替代 252 字节固定数组）
+- [ ] CI 增加静态分析（cppcheck / clang-tidy）与 Sanitizer 构建（ASan/UBSan）
+- [ ] 引入专业变异测试工具（如 Mull）交叉验证杀伤率
+- [ ] 集成测试环境（SHT30 测量时序、总线电气行为）
