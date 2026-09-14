@@ -193,3 +193,24 @@ void test_multi_cycle_convergence_with_plant_model(void)
     }
     TEST_ASSERT_FLOAT_WITHIN(0.5f, setpoint, measurement);
 }
+
+void test_reset_null_handle_is_harmless(void)
+{
+    pid_reset(NULL);   /* void 接口的 NULL 防御：调用后不崩即通过 */
+    float out = 0.0f;
+    TEST_ASSERT_TRUE(pid_compute(&pid, 1.0f, 0.0f, 1.0f, &out));  /* 既有状态未被影响 */
+}
+
+void test_reset_null_handle_is_harmless(void)
+{
+    pid_reset(NULL);   /* void 接口的 NULL 防御：调用后不崩即通过 */
+    float out = 0.0f;
+    TEST_ASSERT_TRUE(pid_compute(&pid, 1.0f, 0.0f, 1.0f, &out));  /* 既有状态未被影响 */
+}
+
+void test_reset_null_handle_is_harmless(void)
+{
+    pid_reset(NULL);   /* void 接口的 NULL 防御：调用后不崩即通过 */
+    float out = 0.0f;
+    TEST_ASSERT_TRUE(pid_compute(&pid, 1.0f, 0.0f, 1.0f, &out));  /* 既有状态未被影响 */
+}

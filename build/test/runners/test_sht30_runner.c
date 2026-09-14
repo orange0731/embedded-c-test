@@ -42,6 +42,7 @@ extern void test_read_null_temperature_never_touches_i2c(void);
 extern void test_read_null_humidity_never_touches_i2c(void);
 extern void test_read_with_stub_callback_fake_sensor(void);
 extern void test_trigger_ok_but_read_nacks_midway_sequence(void);
+extern void test_crc8_zero_length_with_valid_pointer_returns_init(void);
 
 
 /*=======Mock Management=====*/
@@ -157,6 +158,8 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
       UNITY_PRINT_EOL();
       UnityPrint("  test_trigger_ok_but_read_nacks_midway_sequence");
       UNITY_PRINT_EOL();
+      UnityPrint("  test_crc8_zero_length_with_valid_pointer_returns_init");
+      UNITY_PRINT_EOL();
       return 0;
     }
     return parse_status;
@@ -164,7 +167,7 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
 #endif
   UnityBegin("test_sht30.c");
 
-  struct UnityRunTestParameters run_test_params_arr[20];
+  struct UnityRunTestParameters run_test_params_arr[21];
 
   run_test_params_arr[0].func = test_crc8_datasheet_known_vector_beef;
   run_test_params_arr[0].name = "test_crc8_datasheet_known_vector_beef";
@@ -226,8 +229,11 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
   run_test_params_arr[19].func = test_trigger_ok_but_read_nacks_midway_sequence;
   run_test_params_arr[19].name = "test_trigger_ok_but_read_nacks_midway_sequence";
   run_test_params_arr[19].line_num = 212;
+  run_test_params_arr[20].func = test_crc8_zero_length_with_valid_pointer_returns_init;
+  run_test_params_arr[20].name = "test_crc8_zero_length_with_valid_pointer_returns_init";
+  run_test_params_arr[20].line_num = 227;
 
-  for (int i = 0; i < 20; i++)
+  for (int i = 0; i < 21; i++)
   {
     run_test(run_test_params_arr[i].func, run_test_params_arr[i].name, run_test_params_arr[i].line_num);
   }

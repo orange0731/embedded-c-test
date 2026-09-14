@@ -37,6 +37,7 @@ extern void test_compute_rejects_null_pid(void);
 extern void test_compute_rejects_null_output(void);
 extern void test_zero_error_produces_zero_output_on_fresh_controller(void);
 extern void test_multi_cycle_convergence_with_plant_model(void);
+extern void test_reset_null_handle_is_harmless(void);
 
 
 /*=======Mock Management=====*/
@@ -145,6 +146,8 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
       UNITY_PRINT_EOL();
       UnityPrint("  test_multi_cycle_convergence_with_plant_model");
       UNITY_PRINT_EOL();
+      UnityPrint("  test_reset_null_handle_is_harmless");
+      UNITY_PRINT_EOL();
       return 0;
     }
     return parse_status;
@@ -152,7 +155,7 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
 #endif
   UnityBegin("test_pid.c");
 
-  struct UnityRunTestParameters run_test_params_arr[18];
+  struct UnityRunTestParameters run_test_params_arr[19];
 
   run_test_params_arr[0].func = test_init_with_valid_params_succeeds;
   run_test_params_arr[0].name = "test_init_with_valid_params_succeeds";
@@ -208,8 +211,11 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
   run_test_params_arr[17].func = test_multi_cycle_convergence_with_plant_model;
   run_test_params_arr[17].name = "test_multi_cycle_convergence_with_plant_model";
   run_test_params_arr[17].line_num = 182;
+  run_test_params_arr[18].func = test_reset_null_handle_is_harmless;
+  run_test_params_arr[18].name = "test_reset_null_handle_is_harmless";
+  run_test_params_arr[18].line_num = 197;
 
-  for (int i = 0; i < 18; i++)
+  for (int i = 0; i < 19; i++)
   {
     run_test(run_test_params_arr[i].func, run_test_params_arr[i].name, run_test_params_arr[i].line_num);
   }

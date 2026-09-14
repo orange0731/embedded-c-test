@@ -223,3 +223,24 @@ void test_trigger_ok_but_read_nacks_midway_sequence(void)
     float t = 0.0f, h = 0.0f;
     TEST_ASSERT_EQUAL_INT(SHT30_ERR_NACK, sht30_read_measurement(SHT30_I2C_ADDR, &t, &h));
 }
+
+void test_crc8_zero_length_with_valid_pointer_returns_init(void)
+{
+    /* len=0 且指针非 NULL：覆盖 "len == 0u" 这个独立条件（短路求值的第二操作数） */
+    const uint8_t dummy = 0u;
+    TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
+}
+
+void test_crc8_zero_length_with_valid_pointer_returns_init(void)
+{
+    /* len=0 且指针非 NULL：覆盖 "len == 0u" 这个独立条件（短路求值的第二操作数） */
+    const uint8_t dummy = 0u;
+    TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
+}
+
+void test_crc8_zero_length_with_valid_pointer_returns_init(void)
+{
+    /* len=0 且指针非 NULL：覆盖 "len == 0u" 这个独立条件（短路求值的第二操作数） */
+    const uint8_t dummy = 0u;
+    TEST_ASSERT_EQUAL_HEX8(0xFFu, sht30_crc8(&dummy, 0u));
+}

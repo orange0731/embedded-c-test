@@ -43,6 +43,9 @@ extern void test_parse_write_multiple_valid_frame(void);
 extern void test_parse_rejects_write_multiple_byte_count_vs_quantity(void);
 extern void test_parse_rejects_write_multiple_byte_count_vs_actual_length(void);
 extern void test_parse_rejects_write_multiple_quantity_above_123(void);
+extern void test_parse_rejects_write_multiple_with_data_len_below_5(void);
+extern void test_parse_rejects_write_multiple_quantity_zero(void);
+extern void test_parse_accepts_read_input_registers_function_0x04(void);
 
 
 /*=======Mock Management=====*/
@@ -161,6 +164,12 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
       UNITY_PRINT_EOL();
       UnityPrint("  test_parse_rejects_write_multiple_quantity_above_123");
       UNITY_PRINT_EOL();
+      UnityPrint("  test_parse_rejects_write_multiple_with_data_len_below_5");
+      UNITY_PRINT_EOL();
+      UnityPrint("  test_parse_rejects_write_multiple_quantity_zero");
+      UNITY_PRINT_EOL();
+      UnityPrint("  test_parse_accepts_read_input_registers_function_0x04");
+      UNITY_PRINT_EOL();
       return 0;
     }
     return parse_status;
@@ -168,7 +177,7 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
 #endif
   UnityBegin("test_modbus_parser.c");
 
-  struct UnityRunTestParameters run_test_params_arr[23];
+  struct UnityRunTestParameters run_test_params_arr[26];
 
   run_test_params_arr[0].func = test_crc16_known_vector_123456789;
   run_test_params_arr[0].name = "test_crc16_known_vector_123456789";
@@ -239,8 +248,17 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
   run_test_params_arr[22].func = test_parse_rejects_write_multiple_quantity_above_123;
   run_test_params_arr[22].name = "test_parse_rejects_write_multiple_quantity_above_123";
   run_test_params_arr[22].line_num = 225;
+  run_test_params_arr[23].func = test_parse_rejects_write_multiple_with_data_len_below_5;
+  run_test_params_arr[23].name = "test_parse_rejects_write_multiple_with_data_len_below_5";
+  run_test_params_arr[23].line_num = 233;
+  run_test_params_arr[24].func = test_parse_rejects_write_multiple_quantity_zero;
+  run_test_params_arr[24].name = "test_parse_rejects_write_multiple_quantity_zero";
+  run_test_params_arr[24].line_num = 242;
+  run_test_params_arr[25].func = test_parse_accepts_read_input_registers_function_0x04;
+  run_test_params_arr[25].name = "test_parse_accepts_read_input_registers_function_0x04";
+  run_test_params_arr[25].line_num = 250;
 
-  for (int i = 0; i < 23; i++)
+  for (int i = 0; i < 26; i++)
   {
     run_test(run_test_params_arr[i].func, run_test_params_arr[i].name, run_test_params_arr[i].line_num);
   }

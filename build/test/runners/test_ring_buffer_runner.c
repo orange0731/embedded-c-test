@@ -42,6 +42,7 @@ extern void test_full_after_wrap_around_rejects_push(void);
 extern void test_clear_makes_buffer_fully_reusable(void);
 extern void test_capacity_one_boundary(void);
 extern void test_count_stays_consistent_over_alternating_long_sequence(void);
+extern void test_query_functions_return_safe_defaults_on_null_handle(void);
 
 
 /*=======Mock Management=====*/
@@ -158,6 +159,8 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
       UNITY_PRINT_EOL();
       UnityPrint("  test_count_stays_consistent_over_alternating_long_sequence");
       UNITY_PRINT_EOL();
+      UnityPrint("  test_query_functions_return_safe_defaults_on_null_handle");
+      UNITY_PRINT_EOL();
       return 0;
     }
     return parse_status;
@@ -165,7 +168,7 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
 #endif
   UnityBegin("test_ring_buffer.c");
 
-  struct UnityRunTestParameters run_test_params_arr[22];
+  struct UnityRunTestParameters run_test_params_arr[23];
 
   run_test_params_arr[0].func = test_init_with_valid_storage_succeeds;
   run_test_params_arr[0].name = "test_init_with_valid_storage_succeeds";
@@ -233,8 +236,11 @@ static void run_test(UnityTestFunction func, const char* name, UNITY_LINE_TYPE l
   run_test_params_arr[21].func = test_count_stays_consistent_over_alternating_long_sequence;
   run_test_params_arr[21].name = "test_count_stays_consistent_over_alternating_long_sequence";
   run_test_params_arr[21].line_num = 243;
+  run_test_params_arr[22].func = test_query_functions_return_safe_defaults_on_null_handle;
+  run_test_params_arr[22].name = "test_query_functions_return_safe_defaults_on_null_handle";
+  run_test_params_arr[22].line_num = 269;
 
-  for (int i = 0; i < 22; i++)
+  for (int i = 0; i < 23; i++)
   {
     run_test(run_test_params_arr[i].func, run_test_params_arr[i].name, run_test_params_arr[i].line_num);
   }
