@@ -62,7 +62,43 @@
 
 ---
 
-## 系统架构
+<details>
+<summary><b>📊 效果展示</b>（点击展开 3 张截图）</summary>
+
+### 1. 测试全绿
+
+<p align="center">
+  <img src="docs/images/test_summary.png" alt="测试全绿结果" width="85%">
+</p>
+
+> 图 1：Ceedling 测试执行结果，全部 91 条用例通过。
+
+---
+
+### 2. 覆盖率报告
+
+<p align="center">
+  <img src="docs/images/coverage_overview.png" alt="覆盖率总览" width="85%">
+</p>
+
+> 图 2：gcovr 生成的覆盖率报告，语句 100%、分支 98.6%。
+
+---
+
+### 3. 变异测试 6/6
+
+<p align="center">
+  <img src="docs/images/mutation.png" alt="变异测试结果" width="85%">
+</p>
+
+> 图 3：变异测试杀伤力报告，6 个变异体全部被测试用例捕获。
+
+</details>
+
+---
+
+<details>
+<summary><b>🏗️ 系统架构</b>（点击展开 Mermaid 架构图）</summary>
 
 ```mermaid
 flowchart TB
@@ -110,42 +146,9 @@ flowchart TB
     CI --> TEST
 ```
 
----
-
-## 效果展示
-
-
-### 1. 测试全绿
-
-<p align="center">
-  <img src="docs/images/test_summary.png" alt="测试全绿结果" width="85%">
-</p>
-
-> 图 1：Ceedling 测试执行结果，全部 91 条用例通过。
+</details>
 
 ---
-
-### 2. 覆盖率报告
-
-<p align="center">
-  <img src="docs/images/coverage_overview.png" alt="覆盖率总览" width="85%">
-</p>
-
-> 图 2：gcovr 生成的覆盖率报告，语句 100%、分支 98.6%。
-
----
-
-### 3. 变异测试 6/6
-
-<p align="center">
-  <img src="docs/images/mutation.png" alt="变异测试结果" width="85%">
-</p>
-
-> 图 3：变异测试杀伤力报告，6 个变异体全部被测试用例捕获。
-
----
-
-
 
 ## 快速开始
 
@@ -219,7 +222,8 @@ Mutants killed: 6/6 (100%)
 
 ---
 
-## 项目结构
+<details>
+<summary><b>📁 项目结构</b>（点击展开完整目录树）</summary>
 
 ```
 embedded-c-test/
@@ -250,9 +254,12 @@ embedded-c-test/
 └── LICENSE                      # MIT 许可证
 ```
 
+</details>
+
 ---
 
-## 测试矩阵与覆盖率
+<details>
+<summary><b>📈 测试矩阵与覆盖率</b>（点击展开详细表格）</summary>
 
 数据来源：`build/gcov/coverage.txt`（CI Artifacts 可下载）。
 
@@ -264,9 +271,12 @@ embedded-c-test/
 | **sht30** | 21 | 命令字节序、CRC8 手册向量、读回 CRC 独立校验、错误传播与输出不污染契约、换算精度、Callback 假传感器、半路 NACK | 100% | 100% |
 | **合计** | **91** | — | **100%** | **98.6%** |
 
+</details>
+
 ---
 
-## 测试设计要点
+<details>
+<summary><b>🧪 测试设计要点</b>（点击展开 4 项核心策略）</summary>
 
 ### 1. 测试结构：Arrange-Act-Assert
 
@@ -329,9 +339,12 @@ void test_pid_invalid_dt_does_not_pollute_output(void) {
 TEST_ASSERT_FLOAT_WITHIN(0.05f, setpoint, measurement);
 ```
 
+</details>
+
 ---
 
-## 硬件抽象与 Mock 设计
+<details>
+<summary><b>🔧 硬件抽象与 Mock 设计</b>（点击展开依赖倒置原则与 CMock 使用）</summary>
 
 ### 依赖倒置原则
 
@@ -415,9 +428,12 @@ void test_sht30_i2c_nack_error(void) {
 }
 ```
 
+</details>
+
 ---
 
-## 质量保障体系
+<details>
+<summary><b>🔒 质量保障体系</b>（点击展开覆盖率门禁与变异测试）</summary>
 
 ### 1. 覆盖率质量门禁
 
@@ -529,9 +545,12 @@ jobs:
 4. 执行变异测试（6/6）
 5. 归档覆盖率报告（失败时也上传）
 
+</details>
+
 ---
 
-## 覆盖率缺口分析
+<details>
+<summary><b>📉 覆盖率缺口分析</b>（点击展开未覆盖分支说明）</summary>
 
 **当前分支覆盖率：98.6%**
 
@@ -560,9 +579,12 @@ jobs:
 
 **决策**：已补测并闭环
 
+</details>
+
 ---
 
-## 设计决策
+<details>
+<summary><b>📋 设计决策</b>（点击展开技术选型理由）</summary>
 
 | 决策 | 理由 |
 |-----|------|
@@ -575,9 +597,12 @@ jobs:
 | **条件覆盖向 MC/DC 靠拢** | 复合条件的独立作用拆分为独立用例（如 Modbus 地址与功能码双重一致性）；完整 MC/DC 度量列入 Roadmap |
 | **变异测试手动脚本** | 暂无 C 语言成熟变异测试工具；手动植入 6 个典型变异体验证测试杀伤力；未来考虑 Mull 等工具 |
 
+</details>
+
 ---
 
-## 已知限制
+<details>
+<summary><b>⚠️ 已知限制</b>（点击展开 3 项主要限制）</summary>
 
 ### 1. 分支覆盖率未达 100%
 
@@ -617,9 +642,12 @@ jobs:
 - 搭建 QEMU 或真实硬件集成测试环境
 - 增加 SHT30 测量时序验证
 
+</details>
+
 ---
 
-## 改进路线
+<details>
+<summary><b>🚀 改进路线</b>（点击展开已完成与后续计划）</summary>
 
 ### 已完成 ✅
 
@@ -672,6 +700,8 @@ jobs:
 - [ ] **CAN 总线协议解析**：支持 CAN 2.0A/B、CANopen
 - [ ] **UDS 诊断协议**：ISO 14229 核心服务支持
 - [ ] **AUTOSAR 接口适配**：符合 AUTOSAR 规范的接口设计
+
+</details>
 
 ---
 
