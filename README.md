@@ -62,45 +62,86 @@
 
 ---
 
-## 效果展示
+## 系统架构
 
-### 1. 系统架构
+```mermaid
+flowchart TB
+    subgraph CI["持续集成层：GitHub Actions"]
+        C1["git push / Pull Request / 手动触发"]
+        C2["环境准备：Ceedling + gcovr"]
+        C3["单元测试：ceedling test:all"]
+        C4["覆盖率门禁：check_coverage.sh"]
+        C5["变异测试：run_mutation.sh"]
+        C6["归档报告：coverage.html + test_results.xml"]
+        C1 --> C2 --> C3 --> C4 --> C5 --> C6
+    end
 
-<p align="center">
-  <img src="docs/images/architecture.png" alt="系统架构图" width="85%">
-</p>
+    subgraph TEST["测试层：test/"]
+        T1["test_ring_buffer.c (23 条)"]
+        T2["test_modbus_parser.c (26 条)"]
+        T3["test_pid.c (21 条)"]
+        T4["test_sht30.c (21 条)"]
+    end
 
-> 图 1：嵌入式 C 单元测试与质量保障框架系统架构。
+    subgraph FW["测试框架层"]
+        U["Unity：断言引擎"]
+        M["CMock：自动生成 Mock"]
+        G["gcov：覆盖率插桩"]
+    end
+
+    subgraph SRC["被测代码层：src/"]
+        RB["ring_buffer.c/.h"]
+        MB["modbus_parser.c/.h"]
+        PID["pid.c/.h"]
+        SHT["sht30.c/.h"]
+        HAL[["hal_i2c.h（接口声明）"]]
+    end
+
+    T1 --> U --> RB
+    T2 --> U --> MB
+    T3 --> U --> PID
+    T4 --> M --> SHT
+    M --> HAL
+    SHT --> HAL
+    
+    FW --> G
+    G --> SRC
+
+    CI --> TEST
+```
 
 ---
 
-### 2. 测试全绿
+## 效果展示
+
+
+### 1. 测试全绿
 
 <p align="center">
   <img src="docs/images/test_summary.png" alt="测试全绿结果" width="85%">
 </p>
 
-> 图 2：Ceedling 测试执行结果，全部 91 条用例通过。
+> 图 1：Ceedling 测试执行结果，全部 91 条用例通过。
 
 ---
 
-### 3. 覆盖率报告
+### 2. 覆盖率报告
 
 <p align="center">
   <img src="docs/images/coverage_overview.png" alt="覆盖率总览" width="85%">
 </p>
 
-> 图 3：gcovr 生成的覆盖率报告，语句 100%、分支 98.6%。
+> 图 2：gcovr 生成的覆盖率报告，语句 100%、分支 98.6%。
 
 ---
 
-### 4. 变异测试 6/6
+### 3. 变异测试 6/6
 
 <p align="center">
   <img src="docs/images/mutation.png" alt="变异测试结果" width="85%">
 </p>
 
-> 图 4：变异测试杀伤力报告，6 个变异体全部被测试用例捕获。
+> 图 3：变异测试杀伤力报告，6 个变异体全部被测试用例捕获。
 
 ---
 
