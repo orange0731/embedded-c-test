@@ -145,55 +145,7 @@ flowchart TB
 
 ---
 
-## 系统架构
 
-```mermaid
-flowchart TB
-    subgraph CI["持续集成层：GitHub Actions"]
-        C1["git push / Pull Request / 手动触发"]
-        C2["环境准备：Ceedling + gcovr"]
-        C3["单元测试：ceedling test:all"]
-        C4["覆盖率门禁：check_coverage.sh"]
-        C5["变异测试：run_mutation.sh"]
-        C6["归档报告：coverage.html + test_results.xml"]
-        C1 --> C2 --> C3 --> C4 --> C5 --> C6
-    end
-
-    subgraph TEST["测试层：test/"]
-        T1["test_ring_buffer.c (23 条)"]
-        T2["test_modbus_parser.c (26 条)"]
-        T3["test_pid.c (21 条)"]
-        T4["test_sht30.c (21 条)"]
-    end
-
-    subgraph FW["测试框架层"]
-        U["Unity：断言引擎"]
-        M["CMock：自动生成 Mock"]
-        G["gcov：覆盖率插桩"]
-    end
-
-    subgraph SRC["被测代码层：src/"]
-        RB["ring_buffer.c/.h"]
-        MB["modbus_parser.c/.h"]
-        PID["pid.c/.h"]
-        SHT["sht30.c/.h"]
-        HAL[["hal_i2c.h（接口声明）"]]
-    end
-
-    T1 --> U --> RB
-    T2 --> U --> MB
-    T3 --> U --> PID
-    T4 --> M --> SHT
-    M --> HAL
-    SHT --> HAL
-    
-    FW --> G
-    G --> SRC
-
-    CI --> TEST
-```
-
----
 
 ## 快速开始
 
